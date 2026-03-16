@@ -1,0 +1,2208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#059669">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Shrink Machine - Operator App</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        :root {
+            --primary: #059669;
+            --primary-dark: #047857;
+            --primary-light: #d1fae5;
+            --bg-dark: #0f172a;
+            --bg-card: #1e293b;
+            --bg-input: #0f172a;
+            --border: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --danger: #dc2626;
+            --warning: #f59e0b;
+            --info: #0ea5e9;
+            --purple: #8b5cf6;
+            --pink: #ec4899;
+        }
+        
+        body {
+            font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+            background: linear-gradient(135deg, var(--bg-dark) 0%, #1e293b 50%, var(--bg-dark) 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        /* Loading Screen */
+        .loading-screen {
+            position: fixed;
+            inset: 0;
+            background: var(--bg-dark);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+        
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .loading-text {
+            margin-top: 16px;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+        
+        /* Login Screen */
+        .login-screen {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+        
+        .login-header {
+            text-align: center;
+            padding: 40px 0;
+        }
+        
+        .login-logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            margin: 0 auto 20px;
+            box-shadow: 0 10px 40px rgba(5, 150, 105, 0.3);
+        }
+        
+        .login-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--primary);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+        
+        .login-subtitle {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--text-primary);
+        }
+        
+        .login-card {
+            background: var(--bg-card);
+            border-radius: 24px;
+            padding: 24px;
+            border: 1px solid var(--border);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 16px;
+            font-size: 16px;
+            font-family: inherit;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            background: var(--bg-input);
+            color: var(--text-primary);
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        
+        .form-input:focus {
+            border-color: var(--primary);
+        }
+        
+        .form-input::placeholder {
+            color: var(--text-muted);
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 16px;
+            font-size: 16px;
+            font-weight: 700;
+            font-family: inherit;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            box-shadow: 0 4px 15px rgba(5, 150, 105, 0.4);
+        }
+        
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+        
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .btn-secondary {
+            background: var(--border);
+            color: var(--text-secondary);
+        }
+        
+        .error-message {
+            background: rgba(220, 38, 38, 0.1);
+            border: 1px solid rgba(220, 38, 38, 0.3);
+            color: #fca5a5;
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 14px;
+            margin-bottom: 16px;
+            display: none;
+        }
+        
+        .error-message.show {
+            display: block;
+        }
+        
+        /* Registration Screen */
+        .register-screen {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            display: none;
+        }
+        
+        /* Main App */
+        .app-container {
+            display: none;
+            padding-bottom: 160px;
+        }
+        
+        .app-header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            padding: 16px 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 20px rgba(5, 150, 105, 0.3);
+        }
+        
+        .app-header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .app-header-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--primary-light);
+            letter-spacing: 0.5px;
+        }
+        
+        .app-header-subtitle {
+            font-size: 16px;
+            font-weight: 700;
+            color: white;
+        }
+        
+        .operator-info {
+            font-size: 11px;
+            color: rgba(255,255,255,0.8);
+            margin-top: 4px;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: 700;
+            color: white;
+            cursor: pointer;
+        }
+        
+        .nav-tabs {
+            display: flex;
+            background: var(--bg-card);
+            margin: 16px;
+            border-radius: 12px;
+            padding: 4px;
+        }
+        
+        .nav-tab {
+            flex: 1;
+            padding: 12px 8px;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        
+        .nav-tab.active {
+            background: var(--primary);
+            color: white;
+        }
+        
+        /* Sections */
+        .section {
+            padding: 0 16px;
+            margin-bottom: 16px;
+        }
+        
+        .card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid var(--border);
+            margin-bottom: 16px;
+        }
+        
+        .card-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .card-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        
+        .form-row-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px;
+        }
+        
+        .form-select {
+            width: 100%;
+            padding: 14px 16px;
+            font-size: 16px;
+            font-family: inherit;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            background: var(--bg-input);
+            color: var(--text-primary);
+            outline: none;
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 20px;
+        }
+        
+        .info-display {
+            background: var(--bg-input);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 14px 16px;
+            font-size: 16px;
+            color: var(--text-primary);
+        }
+        
+        .target-display {
+            background: linear-gradient(135deg, var(--info), #0284c7);
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+            margin-top: 16px;
+        }
+        
+        .target-label {
+            font-size: 11px;
+            color: #e0f2fe;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .target-value {
+            font-size: 32px;
+            font-weight: 800;
+            color: white;
+        }
+        
+        .target-unit {
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        /* Previous Roll Continue Banner */
+        .continue-banner {
+            background: linear-gradient(135deg, var(--purple), #7c3aed);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        
+        .continue-banner-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 8px;
+        }
+        
+        .continue-banner-info {
+            font-size: 13px;
+            color: rgba(255,255,255,0.8);
+            margin-bottom: 12px;
+        }
+        
+        .continue-btn-group {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .continue-btn {
+            flex: 1;
+            padding: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        
+        .continue-btn.yes {
+            background: white;
+            color: var(--purple);
+        }
+        
+        .continue-btn.no {
+            background: rgba(255,255,255,0.2);
+            color: white;
+        }
+        
+        /* Hour Cards */
+        .hour-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            margin-bottom: 12px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+        
+        .hour-card.active {
+            border-color: var(--primary);
+            box-shadow: 0 0 20px rgba(5, 150, 105, 0.2);
+        }
+        
+        .hour-card.completed {
+            border-color: var(--primary);
+        }
+        
+        .hour-header {
+            padding: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.8));
+        }
+        
+        .hour-header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .hour-number {
+            width: 36px;
+            height: 36px;
+            background: var(--border);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-secondary);
+        }
+        
+        .hour-card.completed .hour-number {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .hour-card.active .hour-number {
+            background: var(--info);
+            color: white;
+        }
+        
+        .hour-time {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .hour-target {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+        
+        .hour-efficiency {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 700;
+        }
+        
+        .eff-high { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; }
+        .eff-medium { background: linear-gradient(135deg, var(--warning), #b45309); color: white; }
+        .eff-low { background: linear-gradient(135deg, var(--danger), #b91c1c); color: white; }
+        
+        .hour-expand {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            transition: transform 0.2s;
+        }
+        
+        .hour-card.expanded .hour-expand {
+            transform: rotate(180deg);
+        }
+        
+        .hour-body {
+            display: none;
+            padding: 0 16px 16px;
+        }
+        
+        .hour-card.expanded .hour-body {
+            display: block;
+        }
+        
+        .hour-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        
+        .hour-input-group label {
+            display: block;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+        }
+        
+        .hour-input {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            font-family: inherit;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            background: var(--bg-input);
+            color: var(--text-primary);
+            outline: none;
+        }
+        
+        .hour-input:focus {
+            border-color: var(--primary);
+        }
+        
+        .hour-input.auto-calc {
+            background: rgba(14,165,233,0.1);
+            border-color: var(--info);
+            color: var(--info);
+            font-weight: 700;
+        }
+        
+        /* Auto-calculated display */
+        .calc-display {
+            background: linear-gradient(135deg, rgba(14,165,233,0.15), rgba(5,150,105,0.1));
+            border: 2px solid var(--info);
+            border-radius: 10px;
+            padding: 12px;
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--info);
+            text-align: center;
+        }
+        .calc-label {
+            font-size: 9px;
+            color: var(--info);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+        
+        .small-input {
+            padding: 10px;
+            font-size: 14px;
+        }
+        
+        /* Rework Info */
+        .rework-info {
+            background: rgba(139, 92, 246, 0.1);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 10px;
+            padding: 12px;
+            margin-top: 8px;
+        }
+        
+        .rework-calc {
+            font-size: 12px;
+            color: var(--purple);
+            line-height: 1.6;
+        }
+        
+        /* Rejection Reason Section */
+        .rejection-reason-section {
+            background: rgba(220, 38, 38, 0.1);
+            border: 1px solid rgba(220, 38, 38, 0.3);
+            border-radius: 10px;
+            padding: 12px;
+            margin-top: 8px;
+        }
+        
+        .rejection-reason-header {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--danger);
+            margin-bottom: 8px;
+        }
+        
+        .rejection-reason-input {
+            width: 100%;
+            padding: 10px;
+            font-size: 14px;
+            font-family: inherit;
+            border: 1px solid rgba(220, 38, 38, 0.3);
+            border-radius: 8px;
+            background: var(--bg-input);
+            color: var(--text-primary);
+            outline: none;
+            resize: none;
+        }
+        
+        .rejection-reason-input:focus {
+            border-color: var(--danger);
+        }
+        
+        /* Downtime Section */
+        .downtime-section {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+            border-radius: 12px;
+            padding: 12px;
+            margin-top: 12px;
+        }
+        
+        .downtime-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .downtime-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--warning);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .add-btn {
+            padding: 6px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        
+        .add-btn.warning { background: var(--warning); color: white; }
+        .add-btn.pink { background: var(--pink); color: white; }
+        .add-btn.danger { background: var(--danger); color: white; }
+        
+        .downtime-entry {
+            background: rgba(0,0,0,0.2);
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 8px;
+        }
+        
+        .downtime-entry-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .downtime-entry-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--warning);
+        }
+        
+        .remove-btn {
+            padding: 4px 8px;
+            font-size: 10px;
+            font-weight: 600;
+            border: none;
+            border-radius: 4px;
+            background: var(--danger);
+            color: white;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        
+        .downtime-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        
+        .downtime-input {
+            width: 100%;
+            padding: 8px;
+            font-size: 13px;
+            font-family: inherit;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            border-radius: 6px;
+            background: var(--bg-input);
+            color: var(--text-primary);
+            outline: none;
+        }
+        
+        .downtime-reason {
+            width: 100%;
+            padding: 8px;
+            font-size: 13px;
+            font-family: inherit;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            border-radius: 6px;
+            background: var(--bg-input);
+            color: var(--text-primary);
+            outline: none;
+            resize: none;
+        }
+        
+        /* Roll Usage Section */
+        .roll-section {
+            background: rgba(236, 72, 153, 0.1);
+            border: 1px solid rgba(236, 72, 153, 0.2);
+            border-radius: 12px;
+            padding: 16px;
+        }
+        
+        .roll-entry {
+            background: rgba(0,0,0,0.2);
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 10px;
+        }
+        
+        .roll-entry-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .roll-entry-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--pink);
+        }
+        
+        .roll-input {
+            width: 100%;
+            padding: 10px;
+            font-size: 14px;
+            font-family: inherit;
+            border: 1px solid rgba(236, 72, 153, 0.3);
+            border-radius: 8px;
+            background: var(--bg-input);
+            color: var(--text-primary);
+            outline: none;
+            margin-bottom: 8px;
+        }
+        
+        .roll-continue-toggle {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: rgba(139, 92, 246, 0.2);
+            border-radius: 8px;
+            margin-top: 8px;
+        }
+        
+        .toggle-label {
+            font-size: 13px;
+            color: var(--text-primary);
+            flex: 1;
+        }
+        
+        .toggle-switch {
+            width: 50px;
+            height: 26px;
+            background: var(--border);
+            border-radius: 13px;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .toggle-switch.active {
+            background: var(--primary);
+        }
+        
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            width: 22px;
+            height: 22px;
+            background: white;
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+            transition: transform 0.2s;
+        }
+        
+        .toggle-switch.active::after {
+            transform: translateX(24px);
+        }
+        
+        /* Summary Bar */
+        .summary-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid var(--border);
+            padding: 12px 16px;
+            z-index: 100;
+        }
+        
+        .summary-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        
+        .summary-stat {
+            text-align: center;
+        }
+        
+        .summary-stat-value {
+            font-size: 16px;
+            font-weight: 800;
+            color: var(--text-primary);
+        }
+        
+        .summary-stat-label {
+            font-size: 9px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+        
+        .submit-btn {
+            width: 100%;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: 700;
+            font-family: inherit;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 15px rgba(5, 150, 105, 0.4);
+        }
+        
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        /* History */
+        .history-section {
+            padding: 0 16px;
+            display: none;
+        }
+        
+        .history-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border: 1px solid var(--border);
+        }
+        
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+        
+        .history-date {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        
+        .history-shift {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+        
+        .history-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+        
+        .history-stat {
+            text-align: center;
+        }
+        
+        .history-stat-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        
+        .history-stat-label {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+        }
+        
+        .empty-icon {
+            font-size: 60px;
+            margin-bottom: 16px;
+        }
+        
+        .empty-text {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+        
+        /* User Menu */
+        .user-menu {
+            display: none;
+            position: fixed;
+            top: 70px;
+            right: 16px;
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 8px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            border: 1px solid var(--border);
+            z-index: 200;
+            min-width: 200px;
+        }
+        
+        .user-menu.show {
+            display: block;
+        }
+        
+        .user-menu-header {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 8px;
+        }
+        
+        .user-menu-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .user-menu-contact {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+        
+        .user-menu-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px;
+            font-size: 14px;
+            color: var(--text-primary);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .user-menu-item:hover {
+            background: var(--bg-input);
+        }
+        
+        .user-menu-item.danger {
+            color: var(--danger);
+        }
+        
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 180px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--bg-card);
+            padding: 12px 24px;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            border: 1px solid var(--border);
+            font-size: 14px;
+            font-weight: 500;
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 300;
+            max-width: 90%;
+            text-align: center;
+        }
+        
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+        
+        .toast.success { border-color: var(--primary); color: var(--primary-light); }
+        .toast.error { border-color: var(--danger); color: #fca5a5; }
+        
+        /* Sheets connection status */
+        .connection-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 600;
+            margin-top: 6px;
+        }
+        .connection-badge.connected { background: rgba(5,150,105,0.2); color: #6ee7b7; }
+        .connection-badge.offline { background: rgba(220,38,38,0.2); color: #fca5a5; }
+        .connection-dot { width: 6px; height: 6px; border-radius: 50%; }
+        .connection-badge.connected .connection-dot { background: #6ee7b7; }
+        .connection-badge.offline .connection-dot { background: #fca5a5; }
+        
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="loading-screen">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Loading...</div>
+    </div>
+    
+    <!-- Login Screen (Simple Name Login) -->
+    <div id="loginScreen" class="login-screen hidden">
+        <div class="login-header">
+            <div class="login-logo">📦</div>
+            <div class="login-title">Aambika Foods & Beverages</div>
+            <div class="login-subtitle">Shrink Machine</div>
+        </div>
+        
+        <div class="login-card">
+            <div style="text-align: center; margin-bottom: 20px;">
+                <div style="font-size: 40px; margin-bottom: 10px;">👤</div>
+                <div style="font-size: 14px; color: var(--text-secondary);">Enter your name to start</div>
+            </div>
+            
+            <div id="errorMessage" class="error-message"></div>
+            
+            <div class="form-group">
+                <label class="form-label">Your Full Name</label>
+                <input type="text" id="loginName" class="form-input" placeholder="Enter your name">
+            </div>
+            <button class="btn btn-primary" onclick="loginOperator()">
+                Start Reporting →
+            </button>
+            <p style="text-align: center; margin-top: 16px; font-size: 12px; color: var(--text-muted);">
+                Your name will appear on all reports submitted to the Google Sheet.
+            </p>
+        </div>
+    </div>
+    
+    <!-- Main App -->
+    <div id="appContainer" class="app-container">
+        <div class="app-header">
+            <div class="app-header-top">
+                <div>
+                    <div class="app-header-title">AAMBIKA FOODS & BEVERAGES</div>
+                    <div class="app-header-subtitle">Shrink Machine Report</div>
+                    <div class="operator-info">👤 <span id="operatorNameDisplay">Operator</span></div>
+                    <div class="connection-badge connected" id="connectionBadge">
+                        <span class="connection-dot"></span>
+                        <span id="connectionText">Google Sheets Connected</span>
+                    </div>
+                </div>
+                <div id="userAvatar" class="user-avatar" onclick="toggleUserMenu()">O</div>
+            </div>
+        </div>
+        
+        <div id="userMenu" class="user-menu">
+            <div class="user-menu-header">
+                <div class="user-menu-name" id="menuUserName">Operator</div>
+                <div class="user-menu-contact" id="menuUserContact">Shrink Machine</div>
+            </div>
+            <div class="user-menu-item" onclick="editOperatorName()">
+                <span>✏️</span> Edit Name
+            </div>
+            <div class="user-menu-item danger" onclick="logout()">
+                <span>🚪</span> Logout
+            </div>
+        </div>
+        
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="switchTab('report')">📝 New Report</button>
+            <button class="nav-tab" onclick="switchTab('history')">📋 History</button>
+        </div>
+        
+        <!-- Report Tab -->
+        <div id="reportTab">
+            <!-- Previous Roll Continue Check -->
+            <div id="continueRollBanner" class="section" style="display: none;">
+                <div class="continue-banner">
+                    <div class="continue-banner-title">📦 Previous Shift Roll — Continue?</div>
+                    <div class="continue-banner-info" id="previousRollInfo">Roll No: XXX, Size: XXX, Weight: XXX kg</div>
+                    <div class="continue-btn-group">
+                        <button class="continue-btn yes" onclick="continuePreviousRoll(true)">✅ Yes, Continue</button>
+                        <button class="continue-btn no" onclick="continuePreviousRoll(false)">❌ No, New Roll</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Shift Setup -->
+            <div class="section">
+                <div class="card">
+                    <div class="card-title">
+                        <span class="card-icon" style="background: linear-gradient(135deg, var(--info), #0284c7);">⚙️</span>
+                        Shift Setup
+                    </div>
+                    
+                    <div class="form-row" style="margin-bottom: 12px;">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label">Date</label>
+                            <div class="info-display" id="reportDateDisplay">--</div>
+                            <input type="hidden" id="reportDate">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label">Shift</label>
+                            <select id="shiftSelect" class="form-select" onchange="updateTimeSlots()">
+                                <option value="A">Shift A (7AM-3PM)</option>
+                                <option value="B">Shift B (3PM-11PM)</option>
+                                <option value="C">Shift C (11PM-7AM)</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row" style="margin-bottom: 12px;">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label">Line BPM</label>
+                            <select id="bpmSelect" class="form-select" onchange="updateTarget()">
+                                <option value="120">120 BPM</option>
+                                <option value="200">200 BPM</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label">Bottle Size</label>
+                            <select id="bottleSizeSelect" class="form-select" onchange="updateTarget()">
+                                <option value="2L">2L</option>
+                                <option value="1L" selected>1L</option>
+                                <option value="500ML">500ML</option>
+                                <option value="250ML">250ML</option>
+                                <option value="200ML">200ML</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row" style="margin-bottom: 12px;">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label">Manpower</label>
+                            <input type="number" id="manpowerCount" class="form-input" placeholder="Count">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label">Machine Start Time</label>
+                            <input type="time" id="machineStartTime" class="form-input">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <label class="form-label">Shrink Supplier</label>
+                        <input type="text" id="shrinkSupplier" class="form-input" placeholder="Supplier">
+                    </div>
+                    
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <label class="form-label">🔢 Shift Opening Counter</label>
+                        <input type="number" id="startCounter" class="form-input" placeholder="Shift A = 0, Shift B/C = previous shift end counter" onchange="renderHourlyCards()" style="font-size:18px; font-weight:700; text-align:center;">
+                        <div id="counterHint" style="font-size:11px; color:var(--info); margin-top:6px; padding:0 4px;"></div>
+                    </div>
+                    
+                    <div class="target-display">
+                        <div class="target-label">Hourly Target</div>
+                        <div class="target-value"><span id="targetValue">600</span> <span class="target-unit">Cases/Hr</span></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Hourly Production -->
+            <div class="section">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                    <div class="card-title" style="margin-bottom: 0;">
+                        <span class="card-icon" style="background: linear-gradient(135deg, var(--purple), #7c3aed);">📊</span>
+                        Hourly Production
+                    </div>
+                    <div style="font-size: 13px; color: var(--text-secondary); background: var(--bg-card); padding: 6px 12px; border-radius: 20px;">
+                        <span id="completedHours">0</span>/8 Hours
+                    </div>
+                </div>
+                
+                
+                <div style="background:rgba(14,165,233,0.1); border:1px solid rgba(14,165,233,0.3); border-radius:10px; padding:10px; margin-bottom:14px; font-size:12px; color:var(--info);">
+                    💡 <strong>Just enter the machine counter reading each hour.</strong> Hourly packs = Current Reading − Previous Reading (auto-calculated).
+                </div>
+                <div id="hourlyCards"></div>
+            </div>
+            
+            <!-- Roll Usage Section -->
+            <div class="section">
+                <div class="card" style="padding: 16px;">
+                    <div class="roll-section">
+                        <div class="downtime-header">
+                            <div class="downtime-title" style="color: var(--pink);">📦 Shrink Roll Usage</div>
+                            <button class="add-btn pink" onclick="addRollEntry()">+ Add Roll</button>
+                        </div>
+                        
+                        <div id="rollEntries"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- End of Shift -->
+            <div class="section">
+                <div class="card">
+                    <div class="card-title">
+                        <span class="card-icon" style="background: linear-gradient(135deg, var(--primary), var(--primary-dark));">🏁</span>
+                        End of Shift
+                    </div>
+                    
+                    <div class="form-row" style="margin-bottom: 12px;">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label">Shift End Counter</label>
+                            <input type="number" id="endCounter" class="form-input" placeholder="Counter" onchange="updateShiftCounterDiff()">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label">Machine Stop Time</label>
+                            <input type="time" id="machineStopTime" class="form-input">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Remarks & Abnormalities</label>
+                        <textarea id="remarks" class="form-input" style="min-height: 80px; resize: vertical;" placeholder="Enter any issues or observations..."></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- History Tab -->
+        <div id="historyTab" class="history-section">
+            <div id="historyList"></div>
+        </div>
+        
+        <!-- Summary Bar -->
+        <div class="summary-bar">
+            <div class="summary-stats">
+                <div class="summary-stat">
+                    <div class="summary-stat-value" id="totalPacks">0</div>
+                    <div class="summary-stat-label">Final Packs</div>
+                </div>
+                <div class="summary-stat">
+                    <div class="summary-stat-value" id="totalEfficiency">0%</div>
+                    <div class="summary-stat-label">Efficiency</div>
+                </div>
+                <div class="summary-stat">
+                    <div class="summary-stat-value" id="totalRejection">0</div>
+                    <div class="summary-stat-label">Rejection</div>
+                </div>
+                <div class="summary-stat">
+                    <div class="summary-stat-value" id="totalDowntime">0m</div>
+                    <div class="summary-stat-label">Downtime</div>
+                </div>
+            </div>
+            <button id="submitBtn" class="submit-btn" onclick="submitReport()">
+                ✓ Submit to Google Sheets
+            </button>
+        </div>
+    </div>
+    
+    <!-- Toast -->
+    <div id="toast" class="toast"></div>
+    
+    <script>
+        // =====================================================================
+        // GOOGLE SHEETS CONFIG
+        // =====================================================================
+        // PASTE YOUR GOOGLE APPS SCRIPT WEB APP URLs HERE (one per line):
+        const GOOGLE_SCRIPT_URLS = {
+            '120': 'https://script.google.com/macros/s/AKfycbwBRHFZauOfiTumoCU_4tmPpP-0JypJOkYqrpy0z5zZzf1-09OrP3yqdu8xlRiVVDnm/exec',
+            '200': 'https://script.google.com/macros/s/AKfycbxnRzd61vI48OloFZ5asPZ9nZYOsqrdctfiJavh6HiwaSO5UGy6QeNH1a873Z9BRWyE/exec'
+        };
+        function getScriptUrl() {
+            const bpm = document.getElementById('bpmSelect').value;
+            return GOOGLE_SCRIPT_URLS[bpm] || '';
+        }
+        function isUrlSet() {
+            const url = getScriptUrl();
+            return url && !url.includes('YOUR_') && url.includes('script.google.com');
+        }
+        
+        // ==================== CONSTANTS ====================
+        const TARGETS = {
+            "120": { "2L": 230, "1L": 600, "500ML": 300, "250ML": 150, "200ML": 150 },
+            "200": { "2L": 465, "1L": 1000, "500ML": 570, "250ML": 250, "200ML": 250 }
+        };
+        
+        const BOTTLES_PER_CASE = {
+            "2L": 9,
+            "1L": 12,
+            "500ML": 24,
+            "250ML": 48,
+            "200ML": 48
+        };
+        
+        const SHIFT_START_TIMES = { A: 7, B: 15, C: 23 };
+        
+        // ==================== STATE ====================
+        let operatorName = '';
+        let hourlyData = [];
+        let rollEntries = [];
+        let shiftStartDateTime = null;
+        let previousShiftRoll = null;
+        
+        // ==================== LOCAL REPORT HISTORY ====================
+        // Reports are saved locally for the history tab + previous roll check
+        function getLocalReports() {
+            try {
+                return JSON.parse(localStorage.getItem('shrink_reports_local') || '[]');
+            } catch { return []; }
+        }
+        
+        function saveLocalReport(report) {
+            const reports = getLocalReports();
+            reports.unshift(report);
+            // Keep last 50 reports locally
+            if (reports.length > 50) reports.length = 50;
+            localStorage.setItem('shrink_reports_local', JSON.stringify(reports));
+        }
+        
+        // ==================== INITIALIZATION ====================
+        document.addEventListener('DOMContentLoaded', () => {
+            const now = new Date();
+            document.getElementById('reportDate').value = now.toISOString().split('T')[0];
+            document.getElementById('reportDateDisplay').textContent = formatDate(now);
+            shiftStartDateTime = now;
+            
+            // Auto-detect shift
+            const currentHour = now.getHours();
+            if (currentHour >= 7 && currentHour < 15) {
+                document.getElementById('shiftSelect').value = 'A';
+            } else if (currentHour >= 15 && currentHour < 23) {
+                document.getElementById('shiftSelect').value = 'B';
+            } else {
+                document.getElementById('shiftSelect').value = 'C';
+            }
+            
+            updateTimeSlots();
+            updateTarget();
+            
+            // Check login
+            operatorName = localStorage.getItem('shrink_operator_name') || '';
+            
+            document.getElementById('loadingScreen').classList.add('hidden');
+            
+            if (operatorName) {
+                showApp();
+                checkPreviousShiftRoll();
+            } else {
+                showLogin();
+            }
+            
+            // Check Sheets connection
+            updateConnectionStatus();
+        });
+        
+        function formatDate(date) {
+            return date.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+        }
+        
+        function formatTime(date) {
+            return date.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+        }
+        
+        // ==================== CONNECTION STATUS ====================
+        function updateConnectionStatus() {
+            const badge = document.getElementById('connectionBadge');
+            const text = document.getElementById('connectionText');
+            
+            if (!isUrlSet()) {
+                badge.className = 'connection-badge offline';
+                text.textContent = 'Sheets URL Not Set';
+            } else {
+                badge.className = 'connection-badge connected';
+                text.textContent = 'Google Sheets Connected';
+            }
+        }
+        
+        // ==================== SCREENS ====================
+        function showLogin() {
+            document.getElementById('loginScreen').classList.remove('hidden');
+            document.getElementById('appContainer').style.display = 'none';
+        }
+        
+        function showApp() {
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('appContainer').style.display = 'block';
+            
+            const displayName = operatorName || 'Operator';
+            document.getElementById('userAvatar').textContent = displayName.charAt(0).toUpperCase();
+            document.getElementById('operatorNameDisplay').textContent = displayName;
+            document.getElementById('menuUserName').textContent = displayName;
+            document.getElementById('menuUserContact').textContent = 'Shrink Machine Operator';
+        }
+        
+        function loginOperator() {
+            const name = document.getElementById('loginName').value.trim();
+            if (!name) {
+                document.getElementById('errorMessage').textContent = 'Please enter your name';
+                document.getElementById('errorMessage').classList.add('show');
+                return;
+            }
+            
+            operatorName = name;
+            localStorage.setItem('shrink_operator_name', name);
+            showApp();
+            checkPreviousShiftRoll();
+            showToast('Welcome, ' + name + '!', 'success');
+        }
+        
+        function editOperatorName() {
+            toggleUserMenu();
+            const newName = prompt('Enter your name:', operatorName);
+            if (newName && newName.trim()) {
+                operatorName = newName.trim();
+                localStorage.setItem('shrink_operator_name', operatorName);
+                document.getElementById('operatorNameDisplay').textContent = operatorName;
+                document.getElementById('menuUserName').textContent = operatorName;
+                document.getElementById('userAvatar').textContent = operatorName.charAt(0).toUpperCase();
+                showToast('Name updated!', 'success');
+            }
+        }
+        
+        function logout() {
+            localStorage.removeItem('shrink_operator_name');
+            operatorName = '';
+            toggleUserMenu();
+            showLogin();
+        }
+        
+        function toggleUserMenu() {
+            document.getElementById('userMenu').classList.toggle('show');
+        }
+        
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('#userAvatar') && !e.target.closest('#userMenu')) {
+                document.getElementById('userMenu').classList.remove('show');
+            }
+        });
+        
+        // ==================== APP FUNCTIONS ====================
+        function switchTab(tab) {
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById('reportTab').style.display = tab === 'report' ? 'block' : 'none';
+            document.getElementById('historyTab').style.display = tab === 'history' ? 'block' : 'none';
+            document.querySelector('.summary-bar').style.display = tab === 'report' ? 'block' : 'none';
+            if (tab === 'history') loadHistory();
+        }
+        
+        function updateTarget() {
+            const bpm = document.getElementById('bpmSelect').value;
+            const size = document.getElementById('bottleSizeSelect').value;
+            const target = TARGETS[bpm][size];
+            document.getElementById('targetValue').textContent = target;
+            hourlyData.forEach(h => h.target = target);
+            updateConnectionStatus();
+            renderHourlyCards();
+        }
+        
+        function updateTimeSlots() {
+            const shift = document.getElementById('shiftSelect').value;
+            const startHour = SHIFT_START_TIMES[shift];
+            const bpm = document.getElementById('bpmSelect').value;
+            const size = document.getElementById('bottleSizeSelect').value;
+            const target = TARGETS[bpm][size];
+            
+            // Auto-set opening counter based on shift
+            const counterInput = document.getElementById('startCounter');
+            const counterHint = document.getElementById('counterHint');
+            
+            if (shift === 'A') {
+                counterInput.value = 0;
+                counterHint.textContent = '✅ Shift A — Counter resets to 0 daily';
+                counterHint.style.color = '#059669';
+            } else {
+                if (!counterInput.value || counterInput.value === '0') {
+                    counterInput.value = '';
+                }
+                counterHint.textContent = "⚠️ Enter previous shift's end counter reading here";
+                counterHint.style.color = '#f59e0b';
+            }
+            
+            hourlyData = [];
+            
+            for (let i = 0; i < 8; i++) {
+                const hour = (startHour + i) % 24;
+                const nextHour = (hour + 1) % 24;
+                
+                const formatHour = (h) => {
+                    const period = h >= 12 ? 'PM' : 'AM';
+                    const displayHour = h % 12 || 12;
+                    return `${displayHour}:00 ${period}`;
+                };
+                
+                hourlyData.push({
+                    id: i + 1,
+                    timeLabel: `${formatHour(hour)} - ${formatHour(nextHour)}`,
+                    target: target,
+                    counterReading: '',
+                    noOfPacks: '',
+                    reworkBottles: '',
+                    reworkCases: 0,
+                    rejectionBottles: '',
+                    rejectionCases: 0,
+                    rejectionReason: '',
+                    finalPacks: 0,
+                    downtimes: []
+                });
+            }
+            
+            renderHourlyCards();
+        }
+        
+        function renderHourlyCards() {
+            const container = document.getElementById('hourlyCards');
+            const bottleSize = document.getElementById('bottleSizeSelect').value;
+            const bottlesPerCase = BOTTLES_PER_CASE[bottleSize];
+            const startCounter = parseInt(document.getElementById('startCounter').value);
+            const hasStartCounter = document.getElementById('startCounter').value !== '';
+            
+            container.innerHTML = hourlyData.map((hour, index) => {
+                const reading = parseInt(hour.counterReading);
+                const hasReading = hour.counterReading !== '';
+                
+                // Get previous reading: for Hour 1 use shift opening counter, otherwise use previous hour's reading
+                let prevReading;
+                let prevLabel;
+                if (index === 0) {
+                    prevReading = hasStartCounter ? startCounter : null;
+                    prevLabel = 'Opening Counter';
+                } else {
+                    const prevHasReading = hourlyData[index - 1].counterReading !== '';
+                    prevReading = prevHasReading ? parseInt(hourlyData[index - 1].counterReading) : null;
+                    prevLabel = 'Hr ' + (index) + ' Reading';
+                }
+                
+                // Auto-calculate packs from counter diff
+                let counterPacks = 0;
+                if (hasReading && prevReading !== null && reading >= prevReading) {
+                    counterPacks = reading - prevReading;
+                }
+                
+                // Auto-set noOfPacks from counter reading
+                if (hasReading && prevReading !== null) {
+                    hour.noOfPacks = counterPacks.toString();
+                }
+                
+                const packs = parseInt(hour.noOfPacks) || 0;
+                const reworkBottles = parseInt(hour.reworkBottles) || 0;
+                const rejectionBottles = parseInt(hour.rejectionBottles) || 0;
+                const reworkCases = reworkBottles ? Math.ceil(reworkBottles / bottlesPerCase) : 0;
+                const rejectionCases = rejectionBottles ? Math.ceil(rejectionBottles / bottlesPerCase) : 0;
+                hour.reworkCases = reworkCases;
+                hour.rejectionCases = rejectionCases;
+                const finalPacks = Math.max(0, packs - reworkCases - rejectionCases);
+                hour.finalPacks = finalPacks;
+                const efficiency = hour.target > 0 ? Math.min(((finalPacks / hour.target) * 100), 999).toFixed(0) : 0;
+                const effClass = efficiency >= 90 ? 'eff-high' : efficiency >= 70 ? 'eff-medium' : 'eff-low';
+                const isCompleted = hour.counterReading !== '';
+                const isActive = !isCompleted && (index === 0 || hourlyData[index - 1].counterReading !== '');
+                const totalDowntimeMins = hour.downtimes.reduce((sum, d) => sum + (parseInt(d.mins) || 0), 0);
+                const hasRejection = rejectionBottles > 0;
+                
+                return `
+                    <div class="hour-card ${isCompleted ? 'completed' : ''} ${isActive ? 'active' : ''}" id="hourCard${index}">
+                        <div class="hour-header" onclick="toggleHourCard(${index})">
+                            <div class="hour-header-left">
+                                <div class="hour-number">${isCompleted ? '✓' : hour.id}</div>
+                                <div>
+                                    <div class="hour-time">${hour.timeLabel}</div>
+                                    <div class="hour-target">Target: ${hour.target} cases${totalDowntimeMins > 0 ? ' • ⏱️' + totalDowntimeMins + 'm' : ''}</div>
+                                </div>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                ${isCompleted ? `<span class="hour-efficiency ${effClass}">${efficiency}%</span>` : ''}
+                                <div class="hour-expand">▼</div>
+                            </div>
+                        </div>
+                        <div class="hour-body">
+                            <!-- Counter Reading Input -->
+                            <div style="margin-bottom:14px;">
+                                <div class="hour-input-group">
+                                    <label>🔢 Machine Counter Reading</label>
+                                    <input type="number" class="hour-input" value="${hour.counterReading}" 
+                                        onchange="updateHourData(${index}, 'counterReading', this.value)" 
+                                        placeholder="Enter counter number shown on machine">
+                                </div>
+                            </div>
+                            
+                            <!-- Auto-calculated Packs -->
+                            ${(hasReading && prevReading !== null) ? `
+                            <div style="background:rgba(14,165,233,0.08); border:1px solid rgba(14,165,233,0.2); border-radius:8px; padding:8px 10px; margin-bottom:10px; font-size:11px; color:var(--info);">
+                                📐 ${reading.toLocaleString()} (current) − ${prevReading.toLocaleString()} (${prevLabel}) = <strong>${counterPacks.toLocaleString()} packs</strong>
+                            </div>` : ''}
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px;">
+                                <div>
+                                    <div class="calc-label">📦 Packs (Auto)</div>
+                                    <div class="calc-display">${counterPacks > 0 ? counterPacks.toLocaleString() : '—'}</div>
+                                </div>
+                                <div>
+                                    <div class="calc-label">📊 Efficiency</div>
+                                    <div class="calc-display" style="${efficiency >= 90 ? 'color:#059669;border-color:#059669;' : efficiency >= 70 ? 'color:#f59e0b;border-color:#f59e0b;' : 'color:#dc2626;border-color:#dc2626;'}">${counterPacks > 0 ? efficiency + '%' : '—'}</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Rework & Rejection -->
+                            <div class="hour-inputs" style="grid-template-columns: 1fr 1fr;">
+                                <div class="hour-input-group">
+                                    <label>Rework (Bottles)</label>
+                                    <input type="number" class="hour-input" value="${hour.reworkBottles}" 
+                                        onchange="updateHourData(${index}, 'reworkBottles', this.value)" placeholder="0">
+                                </div>
+                                <div class="hour-input-group">
+                                    <label>Rejection (Bottles)</label>
+                                    <input type="number" class="hour-input" value="${hour.rejectionBottles}" 
+                                        onchange="updateHourData(${index}, 'rejectionBottles', this.value)" placeholder="0">
+                                </div>
+                            </div>
+                            
+                            ${hasRejection ? `
+                                <div class="rejection-reason-section">
+                                    <div class="rejection-reason-header">
+                                        <span>❌ Rejection Reason (Required)</span>
+                                    </div>
+                                    <textarea class="rejection-reason-input" rows="2" 
+                                        onchange="updateHourData(${index}, 'rejectionReason', this.value)"
+                                        placeholder="Enter reason for rejection...">${hour.rejectionReason || ''}</textarea>
+                                </div>
+                            ` : ''}
+                            
+                            ${(reworkBottles > 0 || rejectionBottles > 0) ? `
+                                <div class="rework-info">
+                                    <div class="rework-calc">
+                                        📊 <strong>Calculation:</strong><br>
+                                        ${reworkBottles > 0 ? `Rework: ${reworkBottles} bottles ÷ ${bottlesPerCase} = <strong>${reworkCases} cases</strong><br>` : ''}
+                                        ${rejectionBottles > 0 ? `Rejection: ${rejectionBottles} bottles ÷ ${bottlesPerCase} = <strong>${rejectionCases} cases</strong><br>` : ''}
+                                        Final: ${packs} - ${reworkCases} - ${rejectionCases} = <strong style="color: var(--primary);">${finalPacks} cases</strong>
+                                    </div>
+                                </div>
+                            ` : ''}
+                            
+                            <div class="downtime-section">
+                                <div class="downtime-header">
+                                    <div class="downtime-title">⏱️ Downtime (${hour.downtimes.length})</div>
+                                    <button class="add-btn warning" onclick="addDowntime(${index})">+ Add</button>
+                                </div>
+                                
+                                ${hour.downtimes.map((dt, dtIndex) => `
+                                    <div class="downtime-entry">
+                                        <div class="downtime-entry-header">
+                                            <div class="downtime-entry-title">Downtime #${dtIndex + 1} ${dt.mins ? '(' + dt.mins + ' mins)' : ''}</div>
+                                            <button class="remove-btn" onclick="removeDowntime(${index}, ${dtIndex})">✕</button>
+                                        </div>
+                                        <div class="downtime-row">
+                                            <div>
+                                                <label style="font-size:10px;color:var(--text-muted);">START</label>
+                                                <input type="time" class="downtime-input" value="${dt.start}" 
+                                                    onchange="updateDowntimeTime(${index}, ${dtIndex}, 'start', this.value)">
+                                            </div>
+                                            <div>
+                                                <label style="font-size:10px;color:var(--text-muted);">END</label>
+                                                <input type="time" class="downtime-input" value="${dt.end}" 
+                                                    onchange="updateDowntimeTime(${index}, ${dtIndex}, 'end', this.value)">
+                                            </div>
+                                            <div>
+                                                <label style="font-size:10px;color:var(--text-muted);">MINS</label>
+                                                <input type="number" class="downtime-input" value="${dt.mins}" 
+                                                    style="background: var(--border); font-weight: 700;" readonly>
+                                            </div>
+                                        </div>
+                                        <textarea class="downtime-reason" rows="1" 
+                                            onchange="updateDowntime(${index}, ${dtIndex}, 'reason', this.value)"
+                                            placeholder="Reason for downtime...">${dt.reason || ''}</textarea>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            updateSummary();
+        }
+        
+        function toggleHourCard(index) {
+            document.getElementById(`hourCard${index}`).classList.toggle('expanded');
+        }
+        
+        function updateHourData(index, field, value) {
+            hourlyData[index][field] = value;
+            renderHourlyCards();
+            document.getElementById(`hourCard${index}`).classList.add('expanded');
+        }
+        
+        function addDowntime(hourIndex) {
+            hourlyData[hourIndex].downtimes.push({ start: '', end: '', mins: '', reason: '' });
+            renderHourlyCards();
+            document.getElementById(`hourCard${hourIndex}`).classList.add('expanded');
+        }
+        
+        function removeDowntime(hourIndex, dtIndex) {
+            hourlyData[hourIndex].downtimes.splice(dtIndex, 1);
+            renderHourlyCards();
+            document.getElementById(`hourCard${hourIndex}`).classList.add('expanded');
+        }
+        
+        function updateDowntime(hourIndex, dtIndex, field, value) {
+            hourlyData[hourIndex].downtimes[dtIndex][field] = value;
+            updateSummary();
+        }
+        
+        function updateDowntimeTime(hourIndex, dtIndex, field, value) {
+            const dt = hourlyData[hourIndex].downtimes[dtIndex];
+            dt[field] = value;
+            
+            if (dt.start && dt.end) {
+                const startParts = dt.start.split(':');
+                const endParts = dt.end.split(':');
+                
+                let startMins = parseInt(startParts[0]) * 60 + parseInt(startParts[1]);
+                let endMins = parseInt(endParts[0]) * 60 + parseInt(endParts[1]);
+                
+                if (endMins < startMins) {
+                    endMins += 24 * 60;
+                }
+                
+                const diffMins = endMins - startMins;
+                dt.mins = diffMins > 0 ? diffMins : 0;
+            }
+            
+            renderHourlyCards();
+            document.getElementById(`hourCard${hourIndex}`).classList.add('expanded');
+        }
+        
+        // ==================== ROLL ENTRIES ====================
+        function addRollEntry() {
+            rollEntries.push({
+                id: Date.now(),
+                rollNo: '',
+                size: '',
+                gsm: '',
+                weight: '',
+                production: '',
+                wastage: '',
+                remarks: '',
+                continueToNext: false
+            });
+            renderRollEntries();
+        }
+        
+        function removeRollEntry(index) {
+            rollEntries.splice(index, 1);
+            renderRollEntries();
+        }
+        
+        function updateRollEntry(index, field, value) {
+            rollEntries[index][field] = value;
+            if (field === 'continueToNext') {
+                renderRollEntries();
+            }
+        }
+        
+        function toggleRollContinue(index) {
+            rollEntries[index].continueToNext = !rollEntries[index].continueToNext;
+            renderRollEntries();
+        }
+        
+        function renderRollEntries() {
+            const container = document.getElementById('rollEntries');
+            
+            if (rollEntries.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-muted); font-size: 13px; text-align: center; padding: 16px;">No rolls added yet. Click "+ Add Roll" to add.</p>';
+                return;
+            }
+            
+            container.innerHTML = rollEntries.map((roll, index) => `
+                <div class="roll-entry">
+                    <div class="roll-entry-header">
+                        <div class="roll-entry-title">Roll #${index + 1}</div>
+                        <button class="remove-btn" onclick="removeRollEntry(${index})">✕ Remove</button>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                        <input type="text" class="roll-input" value="${roll.rollNo}" 
+                            onchange="updateRollEntry(${index}, 'rollNo', this.value)" placeholder="Roll No.">
+                        <input type="text" class="roll-input" value="${roll.size}" 
+                            onchange="updateRollEntry(${index}, 'size', this.value)" placeholder="Size">
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                        <input type="text" class="roll-input" value="${roll.gsm}" 
+                            onchange="updateRollEntry(${index}, 'gsm', this.value)" placeholder="GSM/Thickness">
+                        <input type="number" step="0.01" class="roll-input" value="${roll.weight}" 
+                            onchange="updateRollEntry(${index}, 'weight', this.value)" placeholder="Weight (KG)">
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                        <input type="number" step="0.01" class="roll-input" value="${roll.production}" 
+                            onchange="updateRollEntry(${index}, 'production', this.value)" placeholder="Production (KG)">
+                        <input type="number" step="0.01" class="roll-input" value="${roll.wastage}" 
+                            onchange="updateRollEntry(${index}, 'wastage', this.value)" placeholder="Wastage (gm)">
+                    </div>
+                    
+                    <input type="text" class="roll-input" value="${roll.remarks}" 
+                        onchange="updateRollEntry(${index}, 'remarks', this.value)" placeholder="Remarks">
+                    
+                    <div class="roll-continue-toggle">
+                        <span class="toggle-label">🔄 Continue this roll to next shift?</span>
+                        <div class="toggle-switch ${roll.continueToNext ? 'active' : ''}" onclick="toggleRollContinue(${index})"></div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // ==================== PREVIOUS SHIFT ROLL CHECK (from Google Sheets) ====================
+        async function checkPreviousShiftRoll() {
+            if (!isUrlSet()) {
+                // Fallback to local if Sheets not configured
+                checkPreviousShiftRollLocal();
+                return;
+            }
+            
+            try {
+                const response = await fetch(getScriptUrl() + '?action=get_continuing_roll');
+                const result = await response.json();
+                
+                if (result.status === 'ok' && result.continuingRoll) {
+                    const roll = result.continuingRoll;
+                    previousShiftRoll = {
+                        rollNo: roll.rollNo,
+                        size: roll.size,
+                        gsm: roll.gsm,
+                        weight: roll.weight,
+                        production: roll.production,
+                        wastage: roll.wastage,
+                        remarks: roll.remarks,
+                        continueToNext: false
+                    };
+                    
+                    document.getElementById('previousRollInfo').innerHTML = 
+                        `<strong>Roll No:</strong> ${roll.rollNo} &nbsp;|&nbsp; <strong>Size:</strong> ${roll.size} &nbsp;|&nbsp; <strong>Weight:</strong> ${roll.weight} kg<br>` +
+                        `<span style="font-size:11px; opacity:0.8;">From: ${roll.operatorName} — Shift ${roll.shift} (${roll.date}), Production: ${roll.production || 0} kg</span>`;
+                    document.getElementById('continueRollBanner').style.display = 'block';
+                }
+            } catch (error) {
+                console.log('Error fetching continuing roll from Sheets:', error);
+                // Fallback to local
+                checkPreviousShiftRollLocal();
+            }
+        }
+        
+        // Fallback: check local storage
+        function checkPreviousShiftRollLocal() {
+            const reports = getLocalReports();
+            if (reports.length > 0) {
+                const lastReport = reports[0];
+                const continuingRoll = lastReport.rollEntries?.find(r => r.continueToNext);
+                
+                if (continuingRoll) {
+                    previousShiftRoll = continuingRoll;
+                    document.getElementById('previousRollInfo').textContent = 
+                        `Roll No: ${continuingRoll.rollNo}, Size: ${continuingRoll.size}, Weight: ${continuingRoll.weight} kg`;
+                    document.getElementById('continueRollBanner').style.display = 'block';
+                }
+            }
+        }
+        
+        function continuePreviousRoll(yes) {
+            document.getElementById('continueRollBanner').style.display = 'none';
+            
+            if (yes && previousShiftRoll) {
+                const prevProd = previousShiftRoll.production || 0;
+                rollEntries.push({
+                    ...previousShiftRoll,
+                    id: Date.now(),
+                    production: '', // New operator enters his own production
+                    wastage: '',
+                    remarks: `Continued from previous shift (Prev production: ${prevProd} kg)`,
+                    continueToNext: false
+                });
+                renderRollEntries();
+                showToast('Roll continued from previous shift!', 'success');
+            }
+        }
+        
+        // ==================== SUMMARY ====================
+        function updateSummary() {
+            const bottleSize = document.getElementById('bottleSizeSelect').value;
+            const bottlesPerCase = BOTTLES_PER_CASE[bottleSize];
+            
+            let totalFinalPacks = 0;
+            let totalReworkBottles = 0;
+            let totalRejectionBottles = 0;
+            let totalTarget = 0;
+            let totalDowntime = 0;
+            
+            hourlyData.forEach(h => {
+                const packs = parseInt(h.noOfPacks) || 0;
+                const reworkBottles = parseInt(h.reworkBottles) || 0;
+                const rejectionBottles = parseInt(h.rejectionBottles) || 0;
+                const reworkCases = reworkBottles ? Math.ceil(reworkBottles / bottlesPerCase) : 0;
+                const rejectionCases = rejectionBottles ? Math.ceil(rejectionBottles / bottlesPerCase) : 0;
+                const finalPacks = Math.max(0, packs - reworkCases - rejectionCases);
+                
+                if (h.counterReading !== '') {
+                    totalFinalPacks += finalPacks;
+                    totalReworkBottles += reworkBottles;
+                    totalRejectionBottles += rejectionBottles;
+                    totalTarget += h.target;
+                }
+                
+                h.downtimes.forEach(dt => {
+                    totalDowntime += parseInt(dt.mins) || 0;
+                });
+            });
+            
+            const efficiency = totalTarget > 0 ? ((totalFinalPacks / totalTarget) * 100).toFixed(0) : 0;
+            const completedHours = hourlyData.filter(h => h.counterReading !== '').length;
+            
+            document.getElementById('totalPacks').textContent = totalFinalPacks;
+            document.getElementById('totalEfficiency').textContent = efficiency + '%';
+            document.getElementById('totalRejection').textContent = totalRejectionBottles;
+            document.getElementById('totalDowntime').textContent = totalDowntime + 'm';
+            document.getElementById('completedHours').textContent = completedHours;
+        }
+        
+        // ==================== COUNTER DIFF ====================
+        function updateShiftCounterDiff() {
+            // Just triggers summary update
+            updateSummary();
+        }
+        
+        // ==================== SUBMIT TO GOOGLE SHEETS ====================
+        async function submitReport() {
+            const btn = document.getElementById('submitBtn');
+            const completedHours = hourlyData.filter(h => h.counterReading !== '').length;
+            
+            if (completedHours === 0) {
+                showToast('Please fill at least one hour of data', 'error');
+                return;
+            }
+            
+            // Check rejection reasons
+            const missingReasons = hourlyData.filter(h => 
+                (parseInt(h.rejectionBottles) || 0) > 0 && !h.rejectionReason?.trim()
+            );
+            
+            if (missingReasons.length > 0) {
+                showToast('Please enter rejection reason for Hour ' + missingReasons[0].id, 'error');
+                return;
+            }
+            
+            // Check if URL is set
+            if (!isUrlSet()) {
+                showToast('Google Sheets URL not configured! Ask admin to set it up.', 'error');
+                return;
+            }
+            
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loading-spinner" style="width:20px;height:20px;border-width:2px;"></span> Sending to Sheets...';
+            
+            const bottleSize = document.getElementById('bottleSizeSelect').value;
+            const bottlesPerCase = BOTTLES_PER_CASE[bottleSize];
+            
+            let totalFinalPacks = 0;
+            let totalReworkBottles = 0;
+            let totalReworkCases = 0;
+            let totalRejectionBottles = 0;
+            let totalRejectionCases = 0;
+            let totalDowntime = 0;
+            let totalTarget = 0;
+            
+            hourlyData.forEach(h => {
+                const packs = parseInt(h.noOfPacks) || 0;
+                const reworkBottles = parseInt(h.reworkBottles) || 0;
+                const rejectionBottles = parseInt(h.rejectionBottles) || 0;
+                const reworkCases = reworkBottles ? Math.ceil(reworkBottles / bottlesPerCase) : 0;
+                const rejectionCases = rejectionBottles ? Math.ceil(rejectionBottles / bottlesPerCase) : 0;
+                const finalPacks = Math.max(0, packs - reworkCases - rejectionCases);
+                
+                if (h.counterReading !== '') {
+                    totalFinalPacks += finalPacks;
+                    totalReworkBottles += reworkBottles;
+                    totalReworkCases += reworkCases;
+                    totalRejectionBottles += rejectionBottles;
+                    totalRejectionCases += rejectionCases;
+                    totalTarget += h.target;
+                }
+                h.downtimes.forEach(dt => { totalDowntime += parseInt(dt.mins) || 0; });
+            });
+            
+            const reportId = 'SR-' + Date.now().toString(36).toUpperCase();
+            
+            const report = {
+                reportId: reportId,
+                operatorName: operatorName,
+                machine: 'shrink',
+                
+                date: document.getElementById('reportDate').value,
+                shiftStartTime: shiftStartDateTime.toISOString(),
+                shift: document.getElementById('shiftSelect').value,
+                bpm: document.getElementById('bpmSelect').value,
+                bottleSize: bottleSize,
+                manpowerCount: document.getElementById('manpowerCount').value,
+                shrinkSupplier: document.getElementById('shrinkSupplier').value,
+                startCounter: document.getElementById('startCounter').value,
+                endCounter: document.getElementById('endCounter').value,
+                machineStartTime: document.getElementById('machineStartTime').value,
+                machineStopTime: document.getElementById('machineStopTime').value,
+                remarks: document.getElementById('remarks').value,
+                
+                hourlyData: hourlyData,
+                rollEntries: rollEntries,
+                
+                totals: {
+                    totalFinalPacks,
+                    totalReworkBottles,
+                    totalReworkCases,
+                    totalRejectionBottles,
+                    totalRejectionCases,
+                    totalDowntime,
+                    totalTarget,
+                    efficiency: totalTarget > 0 ? ((totalFinalPacks / totalTarget) * 100).toFixed(1) : 0,
+                    counterDiff: (parseInt(document.getElementById('endCounter').value) || 0) - 
+                                (parseInt(document.getElementById('startCounter').value) || 0)
+                }
+            };
+            
+            try {
+                // Send to Google Sheets
+                const response = await fetch(getScriptUrl(), {
+                    method: 'POST',
+                    mode: 'no-cors', // Required for Apps Script
+                    headers: {
+                        'Content-Type': 'text/plain', // Apps Script requires this with no-cors
+                    },
+                    body: JSON.stringify(report)
+                });
+                
+                // With no-cors, we can't read the response, but if no error thrown, it went through
+                // Save locally for history
+                report.createdAt = new Date().toISOString();
+                saveLocalReport(report);
+                
+                showToast('✅ Report sent to Google Sheets!', 'success');
+                resetForm();
+                
+            } catch (error) {
+                console.error('Submit error:', error);
+                
+                // Save locally even if Sheets fails
+                report.createdAt = new Date().toISOString();
+                report.pendingSync = true;
+                saveLocalReport(report);
+                
+                showToast('⚠️ Saved locally. Sheets sync failed: ' + error.message, 'error');
+            }
+            
+            btn.disabled = false;
+            btn.innerHTML = '✓ Submit to Google Sheets';
+        }
+        
+        function resetForm() {
+            const now = new Date();
+            document.getElementById('reportDate').value = now.toISOString().split('T')[0];
+            document.getElementById('reportDateDisplay').textContent = formatDate(now);
+            shiftStartDateTime = now;
+            
+            document.getElementById('manpowerCount').value = '';
+            document.getElementById('shrinkSupplier').value = '';
+            document.getElementById('startCounter').value = '';
+            document.getElementById('endCounter').value = '';
+            document.getElementById('machineStartTime').value = '';
+            document.getElementById('machineStopTime').value = '';
+            document.getElementById('remarks').value = '';
+            
+            rollEntries = [];
+            renderRollEntries();
+            updateTimeSlots();
+        }
+        
+        // ==================== HISTORY (from local storage) ====================
+        function loadHistory() {
+            const container = document.getElementById('historyList');
+            const reports = getLocalReports();
+            
+            if (reports.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-text">No reports yet</div></div>';
+                return;
+            }
+            
+            container.innerHTML = reports.map(d => {
+                const effClass = d.totals.efficiency >= 90 ? 'eff-high' : d.totals.efficiency >= 70 ? 'eff-medium' : 'eff-low';
+                const syncIcon = d.pendingSync ? '⏳' : '✅';
+                return `
+                    <div class="history-card">
+                        <div class="history-header">
+                            <div>
+                                <div class="history-date">${d.date} ${syncIcon}</div>
+                                <div class="history-shift">Shift ${d.shift} • ${d.bpm} BPM • ${d.bottleSize} • ${d.operatorName}</div>
+                            </div>
+                            <span class="hour-efficiency ${effClass}">${d.totals.efficiency}%</span>
+                        </div>
+                        <div class="history-stats">
+                            <div class="history-stat">
+                                <div class="history-stat-value">${d.totals.totalFinalPacks || 0}</div>
+                                <div class="history-stat-label">Final Packs</div>
+                            </div>
+                            <div class="history-stat">
+                                <div class="history-stat-value" style="color:var(--danger);">${d.totals.totalRejectionBottles || 0}</div>
+                                <div class="history-stat-label">Rejection</div>
+                            </div>
+                            <div class="history-stat">
+                                <div class="history-stat-value" style="color:var(--warning);">${d.totals.totalDowntime}m</div>
+                                <div class="history-stat-label">Downtime</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type} show`;
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+    </script>
+</body>
+</html>
